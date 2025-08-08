@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Копилочка | Учёт накоплений</title>
+    <title>Копилочка | Учёт накоплений и целей</title>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -12,6 +12,9 @@
             --accent: #fd79a8;
             --dark: #2d3436;
             --light: #f5f6fa;
+            --success: #00b894;
+            --danger: #d63031;
+            --warning: #fdcb6e;
         }
         
         body {
@@ -89,7 +92,7 @@
             margin-bottom: 30px;
         }
         
-        input {
+        input, select {
             padding: 15px;
             border: 2px solid var(--secondary);
             border-radius: 10px;
@@ -98,11 +101,11 @@
             transition: all 0.3s ease, box-shadow 0.2s ease;
         }
         
-        input:hover {
+        input:hover, select:hover {
             box-shadow: inset 0 0 8px rgba(108, 92, 231, 0.2);
         }
         
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2), inset 0 0 8px rgba(108, 92, 231, 0.2);
@@ -166,6 +169,11 @@
             grid-column: span 2;
         }
         
+        #addGoalBtn {
+            background-color: var(--success);
+            color: white;
+        }
+        
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2), inset 0 0 10px rgba(255, 255, 255, 0.3);
@@ -176,16 +184,17 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
-        .history {
+        .history, .goals {
             background: white;
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             border: 2px solid var(--secondary);
             transition: all 0.3s ease, box-shadow 0.2s ease;
+            margin-bottom: 25px;
         }
         
-        .history:hover {
+        .history:hover, .goals:hover {
             box-shadow: inset 0 0 15px rgba(108, 92, 231, 0.2), 0 10px 20px rgba(0,0,0,0.1);
         }
         
@@ -220,12 +229,12 @@
         }
         
         .positive {
-            color: #00b894;
+            color: var(--success);
             font-weight: 500;
         }
         
         .negative {
-            color: #d63031;
+            color: var(--danger);
             font-weight: 500;
         }
         
@@ -240,21 +249,124 @@
         }
         
         .delete-btn:hover {
-            background-color: #d63031;
+            background-color: var(--danger);
             box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
         }
         
+        .goal-progress {
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .goal-progress-bar {
+            height: 100%;
+            background-color: var(--success);
+            transition: width 0.5s ease;
+        }
+        
+        .goal-completed .goal-name {
+            text-decoration: line-through;
+            color: #aaa;
+        }
+        
+        .goal-completed .goal-progress-bar {
+            background-color: var(--primary);
+        }
+        
+        .goal-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .goal-name {
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        
+        .goal-amount {
+            font-weight: 700;
+        }
+        
+        .goal-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .goal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .goal-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .goal-missing {
+            color: var(--danger);
+            font-weight: 500;
+        }
+        
+        .goal-achieved {
+            color: var(--success);
+            font-weight: 500;
+        }
+        
+        .goal-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .goal-selector {
+            grid-column: span 2;
+            display: none;
+        }
+        
+        .goal-selector.show {
+            display: block;
+        }
+        
         @media (max-width: 768px) {
-            .controls {
+            .controls, .goal-form {
                 grid-template-columns: 1fr;
             }
             
-            #clearBtn {
+            #clearBtn, .goal-selector {
                 grid-column: span 1;
             }
             
             .container {
                 padding: 15px;
+            }
+            
+            .goal-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .goal-actions {
+                width: 100%;
+                justify-content: flex-end;
             }
         }
 
@@ -269,7 +381,8 @@
         }
 
         .dark-theme .balance,
-        .dark-theme .history {
+        .dark-theme .history,
+        .dark-theme .goals {
             background-color: #2d2d2d;
             border-color: #444;
         }
@@ -283,18 +396,33 @@
             background-color: #6c5ce7;
         }
 
-        .dark-theme input {
+        .dark-theme input,
+        .dark-theme select {
             background-color: #333;
             color: white;
             border-color: #555;
         }
 
-        .dark-theme input:hover {
+        .dark-theme input:hover,
+        .dark-theme select:hover {
             box-shadow: inset 0 0 8px rgba(108, 92, 231, 0.4);
         }
 
         .dark-theme tr:hover td {
             background-color: rgba(108, 92, 231, 0.2);
+        }
+
+        .dark-theme .goal-item {
+            background-color: #333;
+            border-left-color: var(--secondary);
+        }
+
+        .dark-theme .goal-completed .goal-name {
+            color: #777;
+        }
+
+        .dark-theme .goal-progress {
+            background-color: #444;
         }
 
         /* Стили для всплывающего окна */
@@ -380,7 +508,7 @@
             color: #f5f6fa;
         }
 
-        /* Анимации для операций */
+        /* Анимации */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -396,8 +524,39 @@
             animation: pulse 0.5s ease;
         }
 
-        .new-operation {
+        .new-operation, .new-goal {
             animation: fadeIn 0.5s ease forwards;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab:hover:not(.active) {
+            background-color: rgba(108, 92, 231, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
     </style>
 </head>
@@ -413,29 +572,56 @@
             <div class="balance-amount" id="currentBalance">0 ₽</div>
         </div>
         
-        <div class="controls">
-            <input type="number" id="amountInput" placeholder="Сумма" min="0" step="0.01">
-            <input type="text" id="descriptionInput" placeholder="Описание">
-            <button id="addBtn">+ Добавить</button>
-            <button id="subtractBtn">- Вычесть</button>
-            <button id="clearBtn">Очистить всё</button>
+        <div class="tabs">
+            <div class="tab active" data-tab="operations">Операции</div>
+            <div class="tab" data-tab="goals">Цели</div>
         </div>
         
-        <div class="history">
-            <h2>История операций</h2>
-            <table id="historyTable">
-                <thead>
-                    <tr>
-                        <th>Дата</th>
-                        <th>Сумма</th>
-                        <th>Описание</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody id="historyBody">
-                    <!-- Здесь будут добавляться операции -->
-                </tbody>
-            </table>
+        <div class="tab-content active" id="operations-tab">
+            <div class="controls">
+                <input type="number" id="amountInput" placeholder="Сумма" min="0" step="0.01">
+                <input type="text" id="descriptionInput" placeholder="Описание">
+                <select id="goalSelect" class="goal-selector">
+                    <option value="">-- Выберите цель --</option>
+                    <!-- Цели будут добавляться здесь -->
+                </select>
+                <button id="addBtn">+ Добавить</button>
+                <button id="subtractBtn">- Вычесть</button>
+                <button id="clearBtn">Очистить всё</button>
+            </div>
+            
+            <div class="history">
+                <h2>История операций</h2>
+                <table id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Сумма</th>
+                            <th>Описание</th>
+                            <th>Цель</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <!-- Здесь будут добавляться операции -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="goals-tab">
+            <div class="goal-form">
+                <input type="text" id="goalNameInput" placeholder="Название цели">
+                <input type="number" id="goalAmountInput" placeholder="Сумма цели" min="0" step="0.01">
+                <button id="addGoalBtn">Добавить цель</button>
+            </div>
+            
+            <div class="goals">
+                <h2>Мои цели</h2>
+                <div id="goalsList">
+                    <!-- Здесь будут добавляться цели -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -443,7 +629,7 @@
     <div id="welcomePopup" class="popup">
         <div class="popup-content">
             <h2>Здравствуйте, Марина!</h2>
-            <p>Добро пожаловать в ваш личный финансовый трекер!</p>
+            <p>Добро пожаловать в ваш личный финансовый трекер с целями накоплений!</p>
             <button class="popup-close-btn">Спасибо!</button>
         </div>
     </div>
@@ -494,7 +680,7 @@
             });
         });
 
-        // Остальной JavaScript код
+        // Основной JavaScript код
         const currentBalanceEl = document.getElementById('currentBalance');
         const amountInput = document.getElementById('amountInput');
         const descriptionInput = document.getElementById('descriptionInput');
@@ -502,9 +688,30 @@
         const subtractBtn = document.getElementById('subtractBtn');
         const clearBtn = document.getElementById('clearBtn');
         const historyBody = document.getElementById('historyBody');
+        const goalNameInput = document.getElementById('goalNameInput');
+        const goalAmountInput = document.getElementById('goalAmountInput');
+        const addGoalBtn = document.getElementById('addGoalBtn');
+        const goalsList = document.getElementById('goalsList');
+        const goalSelect = document.getElementById('goalSelect');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
 
         let balance = parseFloat(localStorage.getItem('balance')) || 0;
         let operations = JSON.parse(localStorage.getItem('operations')) || [];
+        let goals = JSON.parse(localStorage.getItem('goals')) || [];
+
+        // Переключение вкладок
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                this.classList.add('active');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
 
         function updateBalance() {
             currentBalanceEl.textContent = balance.toFixed(2) + ' ₽';
@@ -515,20 +722,59 @@
             setTimeout(() => {
                 currentBalanceEl.classList.remove('balance-update');
             }, 500);
+            
+            // Обновляем прогресс целей
+            renderGoals();
+            updateGoalSelector();
         }
 
-        function addOperation(amount, description) {
+        function updateGoalSelector() {
+            goalSelect.innerHTML = '<option value="">-- Выберите цель --</option>';
+            
+            goals.forEach(goal => {
+                if (!goal.completed) {
+                    const option = document.createElement('option');
+                    option.value = goal.id;
+                    option.textContent = `${goal.name} (осталось ${(goal.targetAmount - goal.currentAmount).toFixed(2)} ₽)`;
+                    goalSelect.appendChild(option);
+                }
+            });
+            
+            // Показываем селектор только если есть активные цели
+            if (goals.some(goal => !goal.completed)) {
+                goalSelect.classList.add('show');
+            } else {
+                goalSelect.classList.remove('show');
+            }
+        }
+
+        function addOperation(amount, description, goalId = null) {
             const date = new Date();
             const operation = {
                 id: Date.now(),
                 date: date.toLocaleString(),
                 amount: amount,
-                description: description
+                description: description,
+                goalId: goalId
             };
             
             operations.unshift(operation);
             localStorage.setItem('operations', JSON.stringify(operations));
             renderOperations();
+            
+            // Если операция связана с целью, обновляем цель
+            if (goalId) {
+                const goal = goals.find(g => g.id === goalId);
+                if (goal) {
+                    goal.currentAmount += amount;
+                    if (goal.currentAmount >= goal.targetAmount) {
+                        goal.completed = true;
+                    }
+                    localStorage.setItem('goals', JSON.stringify(goals));
+                    renderGoals();
+                    updateGoalSelector();
+                }
+            }
         }
 
         function renderOperations() {
@@ -538,10 +784,13 @@
                 const row = document.createElement('tr');
                 row.classList.add('new-operation');
                 
+                const goalName = op.goalId ? goals.find(g => g.id === op.goalId)?.name || '-' : '-';
+                
                 row.innerHTML = `
                     <td>${op.date}</td>
-                    <td class="${op.amount >= 0 ? 'positive' : 'negative'}">${op.amount >= 0 ? '+' : ''}${op.amount.toFixed(2)}</td>
+                    <td class="${op.amount >= 0 ? 'positive' : 'negative'}">${op.amount >= 0 ? '+' : ''}${op.amount.toFixed(2)} ₽</td>
                     <td>${op.description || '-'}</td>
+                    <td>${goalName}</td>
                     <td><button class="delete-btn" data-id="${op.id}">Удалить</button></td>
                 `;
                 
@@ -555,12 +804,6 @@
             
             document.querySelectorAll('.delete-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    // Анимация нажатия кнопки
-                    this.classList.add('active');
-                    setTimeout(() => {
-                        this.classList.remove('active');
-                    }, 200);
-                    
                     const id = parseInt(this.getAttribute('data-id'));
                     deleteOperation(id);
                 });
@@ -570,14 +813,28 @@
         function deleteOperation(id) {
             const index = operations.findIndex(op => op.id === id);
             if (index !== -1) {
-                balance -= operations[index].amount;
-                operations.splice(index, 1);
+                const operation = operations[index];
+                balance -= operation.amount;
                 
+                // Если операция была связана с целью, откатываем изменения
+                if (operation.goalId) {
+                    const goal = goals.find(g => g.id === operation.goalId);
+                    if (goal) {
+                        goal.currentAmount -= operation.amount;
+                        if (goal.currentAmount < goal.targetAmount) {
+                            goal.completed = false;
+                        }
+                        localStorage.setItem('goals', JSON.stringify(goals));
+                    }
+                }
+                
+                operations.splice(index, 1);
                 localStorage.setItem('balance', balance);
                 localStorage.setItem('operations', JSON.stringify(operations));
                 
                 updateBalance();
                 renderOperations();
+                renderGoals();
             }
         }
 
@@ -585,12 +842,16 @@
             if (confirm('Вы уверены, что хотите очистить все данные? Это действие нельзя отменить.')) {
                 balance = 0;
                 operations = [];
+                goals = [];
                 
                 localStorage.removeItem('balance');
                 localStorage.removeItem('operations');
+                localStorage.removeItem('goals');
                 
                 updateBalance();
                 renderOperations();
+                renderGoals();
+                updateGoalSelector();
             }
         }
 
@@ -601,6 +862,113 @@
             }, 200);
         }
 
+        // Функции для работы с целями
+        function addGoal(name, amount) {
+            const goal = {
+                id: Date.now(),
+                name: name,
+                targetAmount: parseFloat(amount),
+                currentAmount: 0,
+                completed: false,
+                createdAt: new Date().toLocaleString()
+            };
+            
+            goals.push(goal);
+            localStorage.setItem('goals', JSON.stringify(goals));
+            renderGoals();
+            updateGoalSelector();
+        }
+
+        function toggleGoalCompletion(goalId) {
+            const goal = goals.find(g => g.id === goalId);
+            if (goal) {
+                goal.completed = !goal.completed;
+                localStorage.setItem('goals', JSON.stringify(goals));
+                renderGoals();
+                updateGoalSelector();
+            }
+        }
+
+        function deleteGoal(goalId) {
+            // Удаляем все операции, связанные с этой целью
+            operations = operations.filter(op => op.goalId !== goalId);
+            localStorage.setItem('operations', JSON.stringify(operations));
+            
+            // Удаляем саму цель
+            goals = goals.filter(g => g.id !== goalId);
+            localStorage.setItem('goals', JSON.stringify(goals));
+            
+            renderOperations();
+            renderGoals();
+            updateGoalSelector();
+        }
+
+        function renderGoals() {
+            goalsList.innerHTML = '';
+            
+            if (goals.length === 0) {
+                goalsList.innerHTML = '<p style="text-align: center; color: #666;">У вас пока нет целей. Добавьте первую!</p>';
+                return;
+            }
+            
+            goals.forEach(goal => {
+                const progress = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
+                const missingAmount = Math.max(goal.targetAmount - goal.currentAmount, 0);
+                
+                const goalItem = document.createElement('div');
+                goalItem.className = `goal-item ${goal.completed ? 'goal-completed' : ''}`;
+                goalItem.classList.add('new-goal');
+                
+                goalItem.innerHTML = `
+                    <div class="goal-header">
+                        <div class="goal-name">${goal.name}</div>
+                        <div class="goal-actions">
+                            <input type="checkbox" class="goal-checkbox" ${goal.completed ? 'checked' : ''} data-id="${goal.id}">
+                            <button class="delete-btn" data-id="${goal.id}">Удалить</button>
+                        </div>
+                    </div>
+                    <div class="goal-details">
+                        <div>
+                            <span>Накоплено: </span>
+                            <span class="${goal.currentAmount >= goal.targetAmount ? 'goal-achieved' : ''}">${goal.currentAmount.toFixed(2)} ₽</span>
+                            <span> из ${goal.targetAmount.toFixed(2)} ₽</span>
+                        </div>
+                        <div>
+                            ${missingAmount > 0 ? 
+                                `<span class="goal-missing">Осталось: ${missingAmount.toFixed(2)} ₽</span>` : 
+                                '<span class="goal-achieved">Цель достигнута!</span>'}
+                        </div>
+                    </div>
+                    <div class="goal-progress">
+                        <div class="goal-progress-bar" style="width: ${progress}%"></div>
+                    </div>
+                `;
+                
+                goalsList.appendChild(goalItem);
+                
+                // Удаляем класс анимации после её завершения
+                setTimeout(() => {
+                    goalItem.classList.remove('new-goal');
+                }, 500);
+            });
+            
+            // Добавляем обработчики событий для новых элементов
+            document.querySelectorAll('.goal-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    toggleGoalCompletion(parseInt(this.getAttribute('data-id')));
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (confirm('Вы уверены, что хотите удалить эту цель? Все связанные операции останутся, но будут отвязаны от цели.')) {
+                        deleteGoal(parseInt(this.getAttribute('data-id')));
+                    }
+                });
+            });
+        }
+
+        // Обработчики событий
         addBtn.addEventListener('click', function() {
             animateButton(this);
             
@@ -610,12 +978,23 @@
                 return;
             }
             
+            const goalId = goalSelect.value ? parseInt(goalSelect.value) : null;
+            const description = descriptionInput.value.trim();
+            
             balance += amount;
             updateBalance();
-            addOperation(amount, descriptionInput.value);
+            
+            if (goalId) {
+                // Добавляем операцию с привязкой к цели
+                addOperation(amount, description || `Пополнение цели`, goalId);
+            } else {
+                // Обычное пополнение без цели
+                addOperation(amount, description);
+            }
             
             amountInput.value = '';
             descriptionInput.value = '';
+            goalSelect.value = '';
         });
 
         subtractBtn.addEventListener('click', function() {
@@ -624,6 +1003,11 @@
             const amount = parseFloat(amountInput.value);
             if (isNaN(amount) || amount <= 0) {
                 alert('Пожалуйста, введите корректную сумму для вычитания');
+                return;
+            }
+            
+            if (amount > balance) {
+                alert('Недостаточно средств на балансе');
                 return;
             }
             
@@ -638,6 +1022,28 @@
         clearBtn.addEventListener('click', function() {
             animateButton(this);
             clearAll();
+        });
+
+        addGoalBtn.addEventListener('click', function() {
+            animateButton(this);
+            
+            const name = goalNameInput.value.trim();
+            const amount = parseFloat(goalAmountInput.value);
+            
+            if (!name) {
+                alert('Пожалуйста, введите название цели');
+                return;
+            }
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('Пожалуйста, введите корректную сумму цели');
+                return;
+            }
+            
+            addGoal(name, amount);
+            
+            goalNameInput.value = '';
+            goalAmountInput.value = '';
         });
 
         // Добавляем эффект ripple для всех кнопок
@@ -658,8 +1064,11 @@
             });
         });
 
+        // Инициализация при загрузке
         updateBalance();
         renderOperations();
+        renderGoals();
+        updateGoalSelector();
     </script>
 </body>
 </html>
